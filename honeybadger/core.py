@@ -39,7 +39,7 @@ class Honeybadger(object):
         self._send_notice(value, exc_traceback, context=self._get_context())
         self.existing_except_hook(type, value, exc_traceback)
 
-    def notify(self, exception=None, error_class=None, error_message=None, context={}):
+    def notify(self, exception=None, error_class=None, error_message=None, context=None):
         if exception is None:
             exception = {
                 'error_class': error_class,
@@ -47,7 +47,8 @@ class Honeybadger(object):
             }
 
         merged_context = self._get_context()
-        merged_context.update(context)
+        if context:
+            merged_context.update(context)
 
         self._send_notice(exception, context=merged_context)
 
