@@ -64,8 +64,8 @@ class FlaskPlugin(Plugin):
         }
 
         # Add query params
-        params = filter_dict(dict(_request.args), config.params_filters)
-        params.update(filter_dict(dict(_request.form), config.params_filters))
+        params = filter_dict(_request.args.to_dict(flat=False), config.params_filters)
+        params.update(filter_dict(_request.form.to_dict(flat=False), config.params_filters))
 
         payload['params'] = params
 

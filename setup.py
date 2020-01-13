@@ -1,26 +1,15 @@
 import re
 import sys
-
+import os
 from codecs import open
 from setuptools import setup
 
-# Django 2 requires at least python 3.4
-PY3_4 = sys.version_info >= (3, 4)
-PY3_2 = sys.version_info[0:2] == (3, 2)
+tests_require = ['nose', 'mock', 'testfixtures', 'blinker', 'Flask>=1.0']
 
-tests_require = ['nose', 'mock', 'testfixtures', 'Flask>=0.8', 'blinker']
-
-if PY3_4:
-    tests_require.append('django')
-elif PY3_2:
-    tests_require.append('django==1.8')
+if sys.version_info[0:2] <= (3, 4):
+    tests_require.append('Django>=1.11,<1.12')
 else:
-    tests_require.append('django<2')
-
-# Ugly fix for testfixtures on Python 3.2
-if PY3_2:
-    tests_require.remove('testfixtures')
-    tests_require.append('testfixtures==5.3.1')
+    tests_require.append('Django>=2.1,<3.0')
 
 
 def get_version():
@@ -42,6 +31,10 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: System :: Monitoring'
     ],
     install_requires=[

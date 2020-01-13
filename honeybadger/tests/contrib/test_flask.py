@@ -7,15 +7,20 @@ from honeybadger import honeybadger
 from honeybadger.config import Configuration
 from honeybadger.contrib.flask import FlaskPlugin, FlaskHoneybadger
 
-PY3_2 = sys.version_info[0:2] == (3, 2)
-
+PYTHON_VERSION = sys.version_info[0:2]
 
 class FlaskPluginTestCase(unittest.TestCase):
     def setUp(self):
-        if PY3_2:
-            self.skipTest(
-                'Flask requires Python3 > 3.2. More info at http://flask.pocoo.org/docs/0.12/python3/#requirements')
         import flask
+
+        if flask.__version__.startswith('0.12') and PYTHON_VERSION != (2, 6) and PYTHON_VERSION != (2, 7) and PYTHON_VERSION < (3, 3):
+            self.skipTest('Flask 0.12 requires Python 2.6, 2.7 or Python3 > 3.2')
+        
+        if flask.__version__.startswith('1.0') and PYTHON_VERSION != (2, 7) and PYTHON_VERSION < (3, 4):
+            self.skipTest('Flask 1.0 requires Python 2.7 or Python3 > 3.3')
+
+        if flask.__version__.startswith('1.1') and PYTHON_VERSION != (2, 7) and PYTHON_VERSION < (3, 5):
+            self.skipTest('Flask 1.1 requires Python 2.7 or Python3 > 3.4')
 
         self.config = Configuration()
 
@@ -51,12 +56,11 @@ class FlaskPluginTestCase(unittest.TestCase):
             self.assertEqual(payload['action'], 'foo')
             self.assertDictEqual(payload['params'], {'a': ['1', '2'], 'foo': ['bar']})
             self.assertDictEqual(payload['session'], {})
-            self.assertDictEqual(payload['cgi_data'], {
-                'Content-Length': '0',
+            self.assertDictContainsSubset({
                 'Host': 'server:1234',
                 'X-Wizard-Color': 'grey',
                 'REQUEST_METHOD': 'GET'
-            })
+            }, payload['cgi_data'])
             self.assertDictEqual(payload['context'], {'k': 'value'})
 
     def test_get_request_with_session(self):
@@ -71,11 +75,10 @@ class FlaskPluginTestCase(unittest.TestCase):
             self.assertEqual(payload['action'], 'foo')
             self.assertDictEqual(payload['params'], {})
             self.assertDictEqual(payload['session'], {'answer': 42, 'password': '[FILTERED]'})
-            self.assertDictEqual(payload['cgi_data'], {
-                'Content-Length': '0',
+            self.assertDictContainsSubset({
                 'Host': 'server:1234',
                 'REQUEST_METHOD': 'GET'
-            })
+            }, payload['cgi_data'])
             self.assertDictEqual(payload['context'], {'k': 'value'})
 
     def test_post_request(self):
@@ -120,11 +123,17 @@ class FlaskPluginTestCase(unittest.TestCase):
 class FlaskHoneybadgerTestCase(unittest.TestCase):
 
     def setUp(self):
-        if PY3_2:
-            self.skipTest(
-                'Flask requires Python3 > 3.2. More info at http://flask.pocoo.org/docs/0.12/python3/#requirements')
-
         import flask
+
+        if flask.__version__.startswith('0.12') and PYTHON_VERSION != (2, 6) and PYTHON_VERSION != (2, 7) and PYTHON_VERSION < (3, 3):
+            self.skipTest('Flask 0.12 requires Python 2.6, 2.7 or Python3 > 3.2')
+        
+        if flask.__version__.startswith('1.0') and PYTHON_VERSION != (2, 7) and PYTHON_VERSION < (3, 4):
+            self.skipTest('Flask 1.0 requires Python 2.7 or Python3 >= 3.4')
+
+        if flask.__version__.startswith('1.1') and PYTHON_VERSION != (2, 7) and PYTHON_VERSION < (3, 5):
+            self.skipTest('Flask 1.1 requires Python 2.7 or Python3 >= 3.5')
+
         import werkzeug
 
         self.default_headers = {
