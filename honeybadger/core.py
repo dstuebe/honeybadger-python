@@ -55,6 +55,7 @@ class Honeybadger(object):
         self.config.set_config_from_dict(kwargs)
 
     def set_context(self, **kwargs):
+        # This operation is an update, not a set!
         self.thread_local.context = self._get_context()
         self.thread_local.context.update(kwargs)
 
@@ -64,7 +65,7 @@ class Honeybadger(object):
     @contextmanager
     def context(self, **kwargs):
         original_context = copy.copy(self._get_context())
-        self.thread_local.context.update(kwargs)
+        self.set_context(**kwargs)
         try:
             yield
         except:
